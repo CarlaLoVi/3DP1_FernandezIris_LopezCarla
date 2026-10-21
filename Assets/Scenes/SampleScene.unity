@@ -487,6 +487,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bef7a69e36bf2674d88a4581e66b763a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FPSController
+  m_PitchController: {fileID: 0}
+  m_Yawspeed: 0
+  m_Pitchspeed: 0
+  m_InvertPitch: 0
+  m_InvertYaw: 0
+  m_PitchMin: 0
+  m_PitchMax: 0
+  m_Speed: 0
+  m_VerticalSpeed: 0
+  m_JumpSpeed: 5
+  m_DashSpeed: 10
+  m_LeftKeyCode: 97
+  m_RightKeyCode: 100
+  m_UpKeyCode: 119
+  m_DownKeyCode: 115
+  m_JumpKeyCode: 32
+  m_SprintKeyCode: 304
+  m_DebugLockAngleCode: 105
+  m_DebugLockCursorCode: 111
+  m_ReloadKeyCode: 114
+  m_Camera: {fileID: 0}
+  m_ShootButton: 0
+  m_MaxShootDistance: 200
+  m_ShootLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  m_HitPartcilesPrefab: {fileID: 0}
+  m_Animation: {fileID: 0}
+  m_IdleAnimation: {fileID: 0}
+  m_ShootAnimation: {fileID: 0}
+  m_ReloadAnimation: {fileID: 0}
 --- !u!4 &1075552649
 Transform:
   m_ObjectHideFlags: 0
