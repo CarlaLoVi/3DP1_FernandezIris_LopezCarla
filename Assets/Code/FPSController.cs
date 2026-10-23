@@ -267,15 +267,18 @@ public class FPSController : MonoBehaviour
             }
             else if (other.CompareTag("DeadZone"))
             {
-                StartCoroutine(Kill());
+                Kill();
             }
         }
     }
-    IEnumerator Kill()
+    void Kill()
     {
-        yield return new WaitForSeconds(1.5f);
-        GameController.GetGameController().Restart();
-
+        //yield return new WaitForSeconds(1.5f);
+        //GameController.GetGameController().Restart();
+        StartCoroutine(GameController.GetGameController().GetFade().FadeIn(() => {
+            GameController.GetGameController().GetFade().gameObject.SetActive(false);
+            GameController.GetGameController().Restart();
+        }));
     }
 
     public void Restart()
