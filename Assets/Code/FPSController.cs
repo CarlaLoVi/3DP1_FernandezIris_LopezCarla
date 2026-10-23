@@ -28,6 +28,8 @@ public class FPSController : MonoBehaviour
     Vector2 m_StartPosition;
     Quaternion m_StartRotation;
 
+
+
     [Header("Input")]
     public KeyCode m_LeftKeyCode = KeyCode.A;
     public KeyCode m_RightKeyCode = KeyCode.D;
@@ -46,6 +48,7 @@ public class FPSController : MonoBehaviour
     public float m_MaxShootDistance = 200.0f;
     public LayerMask m_ShootLayerMask;
     public GameObject m_HitPartcilesPrefab;
+    public CPoolElements m_HitParticlesPool;
 
     [Header("Weapon Animation")]
     public Animation m_Animation;
@@ -66,9 +69,10 @@ public class FPSController : MonoBehaviour
         m_Yaw = transform.rotation.eulerAngles.y;
         m_Pitch = m_PitchController.eulerAngles.x;
         Cursor.lockState = CursorLockMode.Locked;
-        //Cursor.visible = false;
+        m_HitParticlesPool = new CPoolElements(10, m_HitPartcilesPrefab);
         SetIdWeaponAnimation();
         GameController.GetGameController().SetPlayer(this);
+        
     }
 
     private void Update()
@@ -185,6 +189,8 @@ public class FPSController : MonoBehaviour
             Reload();
         }
 
+        UpdateLifeBarEnemies();
+
         bool CanReload()
         {
             return true;
@@ -216,15 +222,23 @@ public class FPSController : MonoBehaviour
             Ray l_Ray = m_Camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
             if (Physics.Raycast(l_Ray, out RaycastHit l_RaycastHit, m_MaxShootDistance, m_ShootLayerMask.value))
             {
-                CreateShoothitparticles(l_RaycastHit.point, l_RaycastHit.normal);
+                if (l_RaycastHit.collider.CompareTag("HitCollider"))
+                {
+                    l_RaycastHit.collider.GetComponent<HitCollider>().Hit();
+                }
+                else
+                {
+                    CreateShoothitparticles(l_RaycastHit.point, l_RaycastHit.normal);
+                }                
             }
         }
 
         void CreateShoothitparticles(Vector3 position, Vector3 normal)
         {
-            GameObject l_GameObjects = GameObject.Instantiate(m_HitPartcilesPrefab, GameController.GetGameController().m_DestroyObjects);
-            l_GameObjects.transform.position = position;
-            l_GameObjects.transform.rotation = Quaternion.LookRotation(normal);
+            GameObject l_GameObject = m_HitParticlesPool.GetNextElement();
+            l_GameObject.SetActive(true);
+            l_GameObject.transform.position = position;
+            l_GameObject.transform.rotation = Quaternion.LookRotation(normal);
         }
     }
     void SetIdWeaponAnimation()
@@ -270,5 +284,27 @@ public class FPSController : MonoBehaviour
         transform.position = m_StartPosition;
         transform.rotation = m_StartRotation;
         m_CharacterController.enabled = true;
+    }
+
+    void UpdateLifeBarEnemies()
+    {
+        GameController l_GameController = GameController.GetGameController();
+        List<DroneEnemy> l_Enemies = l_GameController.GetEnemies();
+
+        LifeBarElementUI l_LifeBarElementUI = l_GameController.GetIngameUI().m_LifeBarElementUI;
+        l_LifeBarElementUI.Hide();
+
+        foreach(DroneEnemy l_Enemy in l_Enemies)
+        {
+            Vector3 l_ViewporPoint = m_Camera.WorldToViewportPoint(l_Enemy.m_LifeBarPosition.position);
+            bool l_EnemyIsVisible = l_ViewporPoint.z>=0.0f && l_ViewporPoint.x >=0f && l_ViewporPoint.x<=1.0f && l_ViewporPoint.y >=0.0f && l_ViewporPoint.y <= 1.0;
+            
+            if (l_EnemyIsVisible)
+            {
+                Vector2 l_Position = new Vector2(l_ViewporPoint.x * 1920.0f, l_ViewporPoint.y * 1080.0f);
+                l_LifeBarElementUI.Show(l_Position, l_Enemy.GetLife() / (float)l_Enemy.m_MaxLife);
+                break;
+            }
+        }
     }
 }

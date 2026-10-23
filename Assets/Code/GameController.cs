@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class GameController : MonoBehaviour
 {
@@ -6,6 +8,8 @@ public class GameController : MonoBehaviour
     static GameController m_GameCOntroller = null;
     public KeyCode m_RestartKeyCode = KeyCode.F5;
     FPSController m_Player;
+    IngameUI m_IngameUI;
+    List<DroneEnemy> m_Enemies = new List<DroneEnemy>();
 
     private void Awake()
     {
@@ -48,5 +52,25 @@ public class GameController : MonoBehaviour
         {
             Restart();
         }
+    }
+
+    public void SetIngameUI(IngameUI _IngameUI)
+    {
+        m_IngameUI = _IngameUI;
+    }
+
+    public IngameUI GetIngameUI()
+    {
+        return m_IngameUI;
+    }
+
+    public void AddEnemy(DroneEnemy Enemy)
+    {
+        m_Enemies.Add(Enemy);
+    }
+
+    public List<DroneEnemy> GetEnemies()
+    {
+        return m_Enemies;
     }
 }
