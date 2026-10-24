@@ -70,6 +70,26 @@ public class FPSController : MonoBehaviour
         m_Pitch = m_PitchController.eulerAngles.x;
         Cursor.lockState = CursorLockMode.Locked;
         m_HitParticlesPool = new CPoolElements(10, m_HitPartcilesPrefab);
+
+        if (m_Animation != null)  // per a que funcionin les animacions. 
+        {
+            if (m_IdleAnimation != null)
+            {
+                m_Animation.AddClip(m_IdleAnimation, m_IdleAnimation.name);
+            }
+
+            if (m_ShootAnimation != null)
+            {
+                m_Animation.AddClip(m_ShootAnimation, m_ShootAnimation.name);
+            }
+
+            if (m_ReloadAnimation != null)
+            {
+                m_Animation.AddClip(m_ReloadAnimation, m_ReloadAnimation.name);
+            }
+        }
+
+
         SetIdWeaponAnimation();
         GameController.GetGameController().SetPlayer(this);
         
