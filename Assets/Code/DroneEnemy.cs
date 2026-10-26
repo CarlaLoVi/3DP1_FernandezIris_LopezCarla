@@ -21,8 +21,8 @@ public class DroneEnemy : MonoBehaviour
     TState m_CurrentState = TState.IDLE;
     public List<Transform> m_Waypoints;
     int m_CurrentPatrolId;
-    public float m_ChaseDistance = 5.0f;
 
+    public float m_ChaseDistance = 5.0f;
 
     public int m_MaxLife = 50;
     int m_Life;
@@ -34,6 +34,7 @@ public class DroneEnemy : MonoBehaviour
     public int m_HeadHitColliderAmount = 50;
     public int m_BodyHitColliderAmount = 20;
 
+    private Transform m_PlayerTransform;
 
     private void Awake()
     {
@@ -43,8 +44,18 @@ public class DroneEnemy : MonoBehaviour
     private void Start()
     {
         m_Life = m_MaxLife;
-        SetIdleState();
+
         GameController.GetGameController().AddEnemy(this);
+
+        if(m_Waypoints != null && m_Waypoints.Count > 0)
+        {
+            SetPatrolState();
+        }
+        else
+        {
+            SetIdleState();
+        }
+        
     }
 
     private void Update()
@@ -71,51 +82,95 @@ public class DroneEnemy : MonoBehaviour
                 break;
         }
     }
+
     void SetIdleState()
     {
         m_CurrentState=TState.IDLE;
     }
+
+    void UpdateIdleState()
+    {
+        if(m_Waypoints != null & m_Waypoints.Count > 0)
+        {
+            SetPatrolState();
+        }
+        
+    }
+
+
     void SetAlertState()
     {
         m_CurrentState = TState.ALERT;
     }
+
+    void UpdateAlertState()
+    {
+    }
+
     void SetHitState()
     {
         m_CurrentState = TState.HIT;
     }
+
+    void UpdateHitState()
+    {
+
+    }
+
     void SetAttackState()
     {
         m_CurrentState = TState.ATTACK;
     }
+
+    void UpdateAttackState()
+    {
+
+    }
+
     void SetPatrolState()
     {
         m_CurrentState = TState.PATROL;
+
+        if(m_Waypoints != null && m_Waypoints.Count > 0)
+        {
+            m_NavMeshAgent.SetDestination(m_Waypoints[m_CurrentPatrolId].position);
+        }
     }
+
+    void UpdatePatrolState()
+    {
+        if (m_Waypoints == null || m_Waypoints.Count == 0)
+        {
+            return;
+        }
+
+        if (!m_NavMeshAgent.pathPending && m_NavMeshAgent.remainingDistance <= m_NavMeshAgent.stoppingDistance)
+        {
+            m_CurrentPatrolId = (m_CurrentPatrolId + 1) % m_Waypoints.Count;
+            m_NavMeshAgent.SetDestination (m_Waypoints [m_CurrentPatrolId].position);
+        }
+
+    }
+
+
+    void UpdateChaseState()
+    {
+    }
+
     void SetDieState()
     {
         m_CurrentState = TState.DIE;
+        Destroy(gameObject);
     }
-    void UpdateIdleState()
-    {
-    }
-    void UpdateAlertState()
-    {
-    }
-    void UpdateHitState()
-    {
-    }
-    void UpdateAttackState()
-    {
-    }
-    void UpdatePatrolState()
-    {
-    }
+
     void UpdateDieState()
     {
+
     }
-    void UpdateChaseState()
-    { 
-    }
+
+
+
+    
 
     public void Hit(HitCollider.THitColliderType HitColliderType)
     {
