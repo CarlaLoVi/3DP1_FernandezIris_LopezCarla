@@ -9,6 +9,7 @@ TagManager:
   - DeathZone
   - Enemy
   - Door
+  - Key
   layers:
   - Default
   - TransparentFX

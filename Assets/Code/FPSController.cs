@@ -18,6 +18,8 @@ public class FPSController : MonoBehaviour
     public float m_PitchMin;
     public float m_PitchMax;
 
+    public bool m_Key = false;
+
     CharacterController m_CharacterController;
 
     public float m_Speed;
@@ -115,6 +117,31 @@ public class FPSController : MonoBehaviour
              }*/
 
             Cursor.lockState = (Cursor.lockState != CursorLockMode.Locked) ? CursorLockMode.Locked : CursorLockMode.None;
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            TryOpenDoor();
+        }
+
+        void TryOpenDoor()
+        {
+            Ray l_Ray = m_Camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+
+            if (Physics.Raycast(l_Ray, out RaycastHit l_RaycastHit, 3.0f))
+            {
+                if (l_RaycastHit.collider.CompareTag("Door"))
+                {
+                    if (m_Key)
+                    {
+                        l_RaycastHit.collider.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        Debug.Log("Necessites la clau per obrir la porta.");
+                    }
+                }
+            }
         }
 
         float l_MouseX = Input.GetAxis("Mouse X");
@@ -289,6 +316,11 @@ public class FPSController : MonoBehaviour
             {
                 Kill();
             }
+        }
+        if (other.CompareTag("Key"))
+        {
+            m_Key = true;
+            other.gameObject.SetActive(false); 
         }
     }
     void Kill()
