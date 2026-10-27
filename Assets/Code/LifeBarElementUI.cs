@@ -13,8 +13,9 @@ public class LifeBarElementUI : MonoBehaviour
     public void Show (Vector2 Position, float NormalizedLife)
     {
         gameObject.SetActive(true);
-        m_RectTransform.anchoredPosition = Position;
-        m_LifeBarImageUI.fillAmount = NormalizedLife;
+        m_RectTransform.localPosition = new Vector3(Position.x, Position.y, 0f);
+
+        m_LifeBarImageUI.fillAmount = Mathf.Clamp01(NormalizedLife);
 
     }
 

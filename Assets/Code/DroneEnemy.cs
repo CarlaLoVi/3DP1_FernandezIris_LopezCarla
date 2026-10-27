@@ -136,8 +136,6 @@ public class DroneEnemy : MonoBehaviour
             float l_PlayerDistance = Vector3.Distance(m_PlayerTransform.position, transform.position);
             m_LifeBarVisible = l_PlayerDistance < m_ShowLifeBarDistance;
         }
-
-        UpdateLifeBarUI();
     }
 
     public void InitFade()

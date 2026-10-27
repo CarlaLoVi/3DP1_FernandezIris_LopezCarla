@@ -458,23 +458,103 @@ public class FPSController : MonoBehaviour
 
     void UpdateLifeBarEnemies()
     {
-        GameController l_GameController = GameController.GetGameController();
-        List<DroneEnemy> l_Enemies = l_GameController.GetEnemies();
+        GameController l_GameController =
+            GameController.GetGameController();
 
-        LifeBarElementUI l_LifeBarElementUI = l_GameController.GetIngameUI().m_LifeBarElementUI;
+        if (l_GameController == null ||
+            l_GameController.GetIngameUI() == null ||
+            m_Camera == null)
+        {
+            return;
+        }
+
+        LifeBarElementUI l_LifeBarElementUI =
+            l_GameController.GetIngameUI().m_LifeBarElementUI;
+
+        if (l_LifeBarElementUI == null)
+        {
+            return;
+        }
+
+        RectTransform l_ParentRect =
+            l_LifeBarElementUI.transform.parent
+                as RectTransform;
+
+        Canvas l_Canvas =
+            l_LifeBarElementUI.GetComponentInParent<Canvas>();
+
+        if (l_ParentRect == null || l_Canvas == null)
+        {
+            return;
+        }
+
+        // En Screen Space Overlay no se necesita una cámara de UI.
+        Camera l_UICamera =
+            l_Canvas.renderMode == RenderMode.ScreenSpaceOverlay
+                ? null
+                : (l_Canvas.worldCamera != null
+                    ? l_Canvas.worldCamera
+                    : m_Camera);
+
+        // Ocultar la barra hasta encontrar un enemigo válido.
         l_LifeBarElementUI.Hide();
 
-        foreach(DroneEnemy l_Enemy in l_Enemies)
+        List<DroneEnemy> l_Enemies =
+            l_GameController.GetEnemies();
+
+        foreach (DroneEnemy l_Enemy in l_Enemies)
         {
-            Vector3 l_ViewporPoint = m_Camera.WorldToViewportPoint(l_Enemy.m_LifeBarPosition.position);
-            bool l_EnemyIsVisible = l_ViewporPoint.z>=0.0f && l_ViewporPoint.x >=0f && l_ViewporPoint.x<=1.0f && l_ViewporPoint.y >=0.0f && l_ViewporPoint.y <= 1.0;
-            
-            if (l_EnemyIsVisible)
+            if (l_Enemy == null ||
+                !l_Enemy.gameObject.activeInHierarchy ||
+                l_Enemy.GetLife() <= 0 ||
+                l_Enemy.m_LifeBarPosition == null ||
+                l_Enemy.m_MaxLife <= 0)
             {
-                Vector2 l_Position = new Vector2(l_ViewporPoint.x * 1920.0f, l_ViewporPoint.y * 1080.0f);
-                l_LifeBarElementUI.Show(l_Position, l_Enemy.GetLife() / (float)l_Enemy.m_MaxLife);
-                break;
+                continue;
             }
+
+            // Posición del ancla del enemigo en pantalla.
+            Vector3 l_ScreenPosition =
+                m_Camera.WorldToScreenPoint(
+                    l_Enemy.m_LifeBarPosition.position
+                );
+
+            // Ignorar enemigos detrás de la cámara o fuera de pantalla.
+            if (l_ScreenPosition.z <= 0f ||
+                l_ScreenPosition.x < 0f ||
+                l_ScreenPosition.x > Screen.width ||
+                l_ScreenPosition.y < 0f ||
+                l_ScreenPosition.y > Screen.height)
+            {
+                continue;
+            }
+
+            // Convertir coordenadas de pantalla a coordenadas del Canvas.
+            Vector2 l_LocalPosition;
+
+            bool l_PositionIsValid =
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    l_ParentRect,
+                    l_ScreenPosition,
+                    l_UICamera,
+                    out l_LocalPosition
+                );
+
+            if (!l_PositionIsValid)
+            {
+                continue;
+            }
+
+            float l_NormalizedLife =
+                l_Enemy.GetLife() / (float)l_Enemy.m_MaxLife;
+
+            l_LifeBarElementUI.Show(
+                l_LocalPosition,
+                l_NormalizedLife
+            );
+
+            // Un único elemento de barra reutilizable.
+            break;
         }
     }
 }
