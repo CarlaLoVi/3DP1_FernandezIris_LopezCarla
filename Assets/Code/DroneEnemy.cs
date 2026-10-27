@@ -237,7 +237,7 @@ public class DroneEnemy : MonoBehaviour
     void SetAttackState()
     {
         m_CurrentState = TState.ATTACK;
-
+        if (m_NavMeshAgent != null) m_NavMeshAgent.isStopped = true;
     }
 
     void UpdateAttackState()
@@ -302,7 +302,7 @@ public class DroneEnemy : MonoBehaviour
         }
         else if (HearsPlayer())
         {
-            SetAlertState();
+            SetChaseState();
         }
 
     }
