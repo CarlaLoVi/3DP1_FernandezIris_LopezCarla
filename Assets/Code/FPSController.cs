@@ -285,7 +285,7 @@ public class FPSController : MonoBehaviour
             {
                 l_Item.Pick();
             }
-            else if (other.CompareTag("DeadZone"))
+            else if (other.CompareTag("DeathZone"))
             {
                 Kill();
             }

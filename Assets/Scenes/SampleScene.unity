@@ -7872,9 +7872,17 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7479468764242147567, guid: e93b191eaec73f84ca2abeb1e7bef0d6, type: 3}
+      propertyPath: m_SightDistance
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7479468764242147567, guid: e93b191eaec73f84ca2abeb1e7bef0d6, type: 3}
       propertyPath: m_LifeBarPosition
       value: 
       objectReference: {fileID: 639704761}
+    - target: {fileID: 7479468764242147567, guid: e93b191eaec73f84ca2abeb1e7bef0d6, type: 3}
+      propertyPath: m_LifeBarElementUI
+      value: 
+      objectReference: {fileID: 1464297244}
     - target: {fileID: 7479468764242147567, guid: e93b191eaec73f84ca2abeb1e7bef0d6, type: 3}
       propertyPath: m_Waypoints.Array.size
       value: 2
@@ -8034,7 +8042,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1440186886081453849, guid: e92096dadb5b454438d381f4fcb5dfa0, type: 3}
       propertyPath: m_TagString
-      value: Player
+      value: MainCamera
       objectReference: {fileID: 0}
     - target: {fileID: 1554341693347659330, guid: e92096dadb5b454438d381f4fcb5dfa0, type: 3}
       propertyPath: m_Layer
@@ -8058,7 +8066,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4522987027444232067, guid: e92096dadb5b454438d381f4fcb5dfa0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 118.84
+      value: 110.03
       objectReference: {fileID: 0}
     - target: {fileID: 4522987027444232067, guid: e92096dadb5b454438d381f4fcb5dfa0, type: 3}
       propertyPath: m_LocalPosition.y
@@ -8066,7 +8074,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4522987027444232067, guid: e92096dadb5b454438d381f4fcb5dfa0, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 183.05
+      value: 175.82
       objectReference: {fileID: 0}
     - target: {fileID: 4522987027444232067, guid: e92096dadb5b454438d381f4fcb5dfa0, type: 3}
       propertyPath: m_LocalRotation.w
