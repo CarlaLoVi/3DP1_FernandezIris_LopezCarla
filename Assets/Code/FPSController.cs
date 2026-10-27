@@ -342,7 +342,6 @@ public class FPSController : MonoBehaviour
                 }
 
 
-
                 /*if (l_RaycastHit.collider.CompareTag("HitCollider"))
                 {
                     l_RaycastHit.collider.GetComponent<HitCollider>().Hit();
@@ -473,15 +472,9 @@ public class FPSController : MonoBehaviour
         {
             l_Elapsed += Time.deltaTime;
 
-            float l_Alpha = Mathf.Lerp(
-                m_DamageFlashAlpha,
-                0f,
-                Mathf.Clamp01(l_Elapsed / l_Duration)
-            );
+            float l_Alpha = Mathf.Lerp(m_DamageFlashAlpha,0f,Mathf.Clamp01(l_Elapsed / l_Duration));
 
-            m_DamageFlashImage.color = new Color(
-                1f, 0f, 0f, l_Alpha
-            );
+            m_DamageFlashImage.color = new Color(1f, 0f, 0f, l_Alpha);
 
             yield return null;
         }

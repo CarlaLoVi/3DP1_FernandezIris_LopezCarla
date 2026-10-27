@@ -204,20 +204,33 @@ public class DroneEnemy : MonoBehaviour
 
         if (SeesPlayer())
         {
-            if (m_NavMeshAgent != null) m_NavMeshAgent.isStopped = false;
+            if (m_NavMeshAgent != null)
+            {
+                m_NavMeshAgent.isStopped = false;
+            }
+                
             float l_PlayerDistance = Vector3.Distance(GetPlayerPosition(), transform.position);
 
             if (l_PlayerDistance > m_MinDistanceToAttack)
+            {
                 SetChaseState();
-            else
-                SetAttackState();
+            }
 
+            else
+            {
+                SetAttackState();
+            }
+                
             return;
         }
 
         if (m_AcumulatedAlertAngle >= 360.0f)
         {
-            if (m_NavMeshAgent != null) m_NavMeshAgent.isStopped = false;
+            if (m_NavMeshAgent != null)
+            {
+                m_NavMeshAgent.isStopped = false;
+            }
+                
             SetPatrolState();
         }
     }
@@ -235,7 +248,10 @@ public class DroneEnemy : MonoBehaviour
     void SetAttackState()
     {
         m_CurrentState = TState.ATTACK;
-        if (m_NavMeshAgent != null) m_NavMeshAgent.isStopped = true;
+        if (m_NavMeshAgent != null)
+        {
+            m_NavMeshAgent.isStopped = true;
+        }
     }
 
     void UpdateAttackState()
@@ -253,7 +269,7 @@ public class DroneEnemy : MonoBehaviour
                 transform.forward = l_Direction;
             }
 
-            // Temporizador de ataque
+            // Temporitzador atac
             m_CurrentAttackTime += Time.deltaTime;
             if (m_CurrentAttackTime >= m_AttackTime)
             {
@@ -356,8 +372,6 @@ public class DroneEnemy : MonoBehaviour
         }
     }
 
-
-
     public void MoveToNextPatrolPoint()
     {
         if (m_Waypoints == null || m_Waypoints.Count == 0) return;
@@ -445,18 +459,15 @@ public class DroneEnemy : MonoBehaviour
     {
         FPSController l_PlayerController = null;
 
-        // Primero, buscar en el objeto del jugador.
         if (m_PlayerTransform != null)
         {
             l_PlayerController = m_PlayerTransform.GetComponent<FPSController>();
 
-            // Si no está ahí, buscar en los padres.
             if (l_PlayerController == null)
             {
                 l_PlayerController = m_PlayerTransform.GetComponentInParent<FPSController>();
             }
 
-            // Si tampoco está, buscar en los hijos.
             if (l_PlayerController == null)
             {
                 l_PlayerController =
@@ -464,7 +475,6 @@ public class DroneEnemy : MonoBehaviour
             }
         }
 
-        // Último recurso: buscar el controlador en la escena.
         if (l_PlayerController == null)
         {
             l_PlayerController =
@@ -476,10 +486,8 @@ public class DroneEnemy : MonoBehaviour
             return;
         }
 
-        // Guardar la referencia correcta del jugador.
         m_PlayerTransform = l_PlayerController.transform;
 
-        // Aplicar el daño y activar el efecto rojo.
         l_PlayerController.TakeDamage(m_Damage);
 
     }
@@ -511,10 +519,7 @@ public class DroneEnemy : MonoBehaviour
             if (l_ViewportPos.z > 0)
             {
                 RectTransform l_CanvasRect = m_LifeBarElementUI.transform.parent.GetComponent<RectTransform>();
-                Vector2 l_CanvasPosition = new Vector2(
-                    (l_ViewportPos.x - 0.5f) * l_CanvasRect.rect.width,
-                    (l_ViewportPos.y - 0.5f) * l_CanvasRect.rect.height
-                );
+                Vector2 l_CanvasPosition = new Vector2((l_ViewportPos.x - 0.5f) * l_CanvasRect.rect.width,(l_ViewportPos.y - 0.5f) * l_CanvasRect.rect.height);
 
                 float l_NormalizedLife = (float)m_Life / m_MaxLife;
                 m_LifeBarElementUI.Show(l_CanvasPosition, l_NormalizedLife);

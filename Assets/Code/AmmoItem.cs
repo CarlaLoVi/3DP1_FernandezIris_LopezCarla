@@ -8,8 +8,7 @@ public class AmmoItem : Item
     {
         FPSController l_Player = GetPlayer();
 
-        return l_Player != null &&
-               l_Player.CanReceiveAmmo(m_AmmoPoints);
+        return l_Player != null && l_Player.CanReceiveAmmo(m_AmmoPoints);
     }
 
     public override void Pick()
