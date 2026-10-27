@@ -64,6 +64,7 @@ public class FPSController : MonoBehaviour
     public float m_DamageFlashAlpha = 0.45f;
     Coroutine m_DamageFlashCoroutine;
 
+
     [Header("Player Life")]
     public int m_MaxLife = 100;
     private int m_Life;
@@ -71,14 +72,37 @@ public class FPSController : MonoBehaviour
     public TMP_Text m_LifeText;
 
 
+    [Header("Ammo")]
+    public int m_MagazineSize = 30;
+    public int m_MagazineAmmo = 30;
+    public int m_MaxReserveAmmo = 120;
+    public int m_ReserveAmmo = 60;
+    public TMP_Text m_AmmoText;
+
+
+    [Header("Shield")]
+    public int m_MaxShield = 100;
+    private int m_Shield;
+    public TMP_Text m_ShieldText;
 
     private void Awake()
     {
         m_CharacterController = GetComponent<CharacterController>();
 
+        //vida
         m_MaxLife = Mathf.Max(1, m_MaxLife);
         m_Life = m_MaxLife;
 
+        //munició 
+        m_MagazineSize = Mathf.Max(1, m_MagazineSize);
+        m_MagazineAmmo = Mathf.Clamp(m_MagazineAmmo, 0, m_MagazineSize);
+
+        m_MaxReserveAmmo = Mathf.Max(0, m_MaxReserveAmmo);
+        m_ReserveAmmo = Mathf.Clamp(m_ReserveAmmo, 0, m_MaxReserveAmmo);
+
+        //escut
+        m_MaxShield = Mathf.Max(0, m_MaxShield);
+        m_Shield = m_MaxShield;
     }
 
 
@@ -99,6 +123,8 @@ public class FPSController : MonoBehaviour
         m_Life = m_MaxLife;
 
         UpdateLifeUI();
+        UpdateAmmoUI();
+        UpdateShieldUI();
 
         if (m_Animation != null)  // per a que funcionin les animacions. 
         {
@@ -259,7 +285,7 @@ public class FPSController : MonoBehaviour
 
         bool CanReload()
         {
-            return true;
+            return m_MagazineAmmo < m_MagazineSize && m_ReserveAmmo > 0; 
         }
         bool MustReload()
         {
@@ -268,12 +294,23 @@ public class FPSController : MonoBehaviour
 
         void Reload()
         {
-            SetreloadWeaponAnimation();
+            int l_AmmoNeeded = m_MagazineSize - m_MagazineAmmo;
+            int l_AmmoToReload = Mathf.Min(l_AmmoNeeded,m_ReserveAmmo);
+
+            m_MagazineAmmo += l_AmmoToReload;
+            m_ReserveAmmo -= l_AmmoToReload;
+
+            UpdateAmmoUI();
+
+            if (m_Animation != null && m_ReloadAnimation != null && m_IdleAnimation != null)
+            {
+                SetreloadWeaponAnimation();
+            }
         }
 
         bool CanShoot()
         {
-            return true;
+            return m_MagazineAmmo > 0;
         }
 
         bool MustShoot()
@@ -283,6 +320,9 @@ public class FPSController : MonoBehaviour
 
         void Shoot()
         {
+            m_MagazineAmmo--;
+            UpdateAmmoUI();
+
             SetShootWeaponAnimation();
             Ray l_Ray = m_Camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
             if (Physics.Raycast(l_Ray, out RaycastHit l_RaycastHit, m_MaxShootDistance, m_ShootLayerMask.value))
@@ -367,7 +407,80 @@ public class FPSController : MonoBehaviour
         m_LifeText.text = "Life " + m_Life + "/" + m_MaxLife;
     }
 
-    System.Collections.IEnumerator DamageFlashCoroutine()
+    //vida
+    public bool CanReceiveHealth(int points)
+    {
+        return points > 0 && m_Life < m_MaxLife;
+    }
+
+    public bool AddLife(int points)
+    {
+        if (!CanReceiveHealth(points))
+            return false;
+
+        m_Life = Mathf.Min(m_MaxLife, m_Life + points);
+
+        UpdateLifeUI();
+        return true;
+    }
+
+    //munició
+    public bool CanReceiveAmmo(int points)
+    {
+        return points > 0 && m_ReserveAmmo < m_MaxReserveAmmo;
+    }
+
+    public bool AddAmmo(int points)
+    {
+        if (!CanReceiveAmmo(points))
+        {
+            return false;
+        }
+
+        m_ReserveAmmo = Mathf.Min(m_MaxReserveAmmo,m_ReserveAmmo + points);
+
+        UpdateAmmoUI();
+        return true;
+    }
+
+    private void UpdateAmmoUI()
+    {
+        if (m_AmmoText == null)
+        {
+            return;
+        }
+
+        m_AmmoText.text = "Ammo: " + m_MagazineAmmo + "/" + m_MagazineSize + " | Carregador: " + m_ReserveAmmo + "/" + m_MaxReserveAmmo;
+    }
+
+    //escut
+    public bool CanReceiveShield(int points)
+    {
+        return points > 0 && m_Shield < m_MaxShield;
+    }
+
+    public bool AddShield(int points)
+    {
+        if (!CanReceiveShield(points))
+            return false;
+
+        m_Shield = Mathf.Min(m_MaxShield, m_Shield + points);
+
+        UpdateShieldUI();
+        return true;
+    }
+
+    private void UpdateShieldUI()
+    {
+        if (m_ShieldText == null)
+        {
+            return;
+        }
+
+        m_ShieldText.text = "Shield: " + m_Shield + "/" + m_MaxShield;
+    }
+
+    IEnumerator DamageFlashCoroutine()
     {
         float l_Duration = Mathf.Max(0.01f, m_DamageFlashDuration);
         float l_Elapsed = 0f;
@@ -409,14 +522,16 @@ public class FPSController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Item"))
+        Item l_Item = other.GetComponentInParent<Item>();
+
+        if (l_Item != null)
         {
-            var l_Item = other.GetComponent<Item>();
             if (l_Item.CanPick())
             {
                 l_Item.Pick();
             }
         }
+
         if (other.CompareTag("DeadZone"))
         {
             Kill();

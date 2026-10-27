@@ -6,11 +6,19 @@ public class AmmoItem : Item
 
     public override bool CanPick()
     {
-        return true;
+        FPSController l_Player = GetPlayer();
+
+        return l_Player != null &&
+               l_Player.CanReceiveAmmo(m_AmmoPoints);
     }
 
     public override void Pick()
     {
-        base.Pick();
+        FPSController l_Player = GetPlayer();
+
+        if (l_Player != null && l_Player.AddAmmo(m_AmmoPoints))
+        {
+            base.Pick();
+        }
     }
 }
