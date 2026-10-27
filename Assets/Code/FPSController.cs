@@ -76,6 +76,15 @@ public class FPSController : MonoBehaviour
     private void Awake()
     {
         m_CharacterController = GetComponent<CharacterController>();
+
+        m_MaxLife = Mathf.Max(1, m_MaxLife);
+        m_Life = m_MaxLife;
+
+        Debug.Log(
+            "VIDA INICIALIZADA: " + m_Life +
+            " | Jugador: " + name +
+            " | ID: " 
+        );
     }
 
 
@@ -87,8 +96,17 @@ public class FPSController : MonoBehaviour
         m_Pitch = m_PitchController.eulerAngles.x;
         Cursor.lockState = CursorLockMode.Locked;
         m_HitParticlesPool = new CPoolElements(10, m_HitPartcilesPrefab);
+
+        if (m_MaxLife <= 0)
+        {
+            m_MaxLife = 100;
+        }
+
         m_Life = m_MaxLife;
+
         UpdateLifeUI();
+
+        Debug.Log("VIDA INICIALIZADA: " + m_Life);
 
         if (m_Animation != null)  // per a que funcionin les animacions. 
         {
@@ -308,39 +326,58 @@ public class FPSController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        m_Life = Mathf.Max(0, m_Life - damage);
+        Debug.Log(
+            "DAÑO RECIBIDO: " + damage +
+            " | VIDA ANTES: " + m_Life
+        );
 
-        // Actualizar el HUD.
-        UpdateLifeUI();
-
-        Debug.Log("Vida del jugador: " + m_Life);
-
-        // Mantener el efecto rojo que ya hemos creado.
-        if (m_DamageFlashImage == null)
+        // Si el jugador ya no tiene vida, no aplicar más daño.
+        if (m_Life <= 0)
         {
-            Debug.LogWarning(
-                "Asigna DamageFlash en el Inspector."
-            );
+            Debug.LogWarning("El jugador ya tiene 0 de vida.");
             return;
         }
 
-        if (m_DamageFlashCoroutine != null)
-        {
-            StopCoroutine(m_DamageFlashCoroutine);
-        }
+        // Restar el daño sin permitir vida negativa.
+        damage = Mathf.Max(0, damage);
+        m_Life = Mathf.Max(0, m_Life - damage);
 
-        m_DamageFlashCoroutine =
-            StartCoroutine(DamageFlashCoroutine());
+        // Actualizar el texto del HUD.
+        UpdateLifeUI();
+
+        Debug.Log("VIDA DESPUÉS: " + m_Life);
+
+        // Mostrar el efecto rojo si la imagen está asignada.
+        if (m_DamageFlashImage != null)
+        {
+            if (m_DamageFlashCoroutine != null)
+            {
+                StopCoroutine(m_DamageFlashCoroutine);
+            }
+
+            m_DamageFlashCoroutine =
+                StartCoroutine(DamageFlashCoroutine());
+        }
+        else
+        {
+            Debug.LogWarning(
+                "Falta asignar Damage Flash Image en el Inspector."
+            );
+        }
     }
 
     void UpdateLifeUI()
     {
-        if (m_LifeText != null)
+        if (m_LifeText == null)
         {
-            m_LifeText.text =
-                "Vida: " + m_Life + " / " + m_MaxLife;
+            Debug.LogError("Life Text no está asignado.", this);
+            return;
         }
+
+        m_LifeText.text =
+            "Life Points\n" + m_Life + "/" + m_MaxLife;
     }
+
     System.Collections.IEnumerator DamageFlashCoroutine()
     {
         float l_Duration = Mathf.Max(0.01f, m_DamageFlashDuration);
