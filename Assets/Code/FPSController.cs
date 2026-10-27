@@ -49,8 +49,6 @@ public class FPSController : MonoBehaviour
     public int m_ShootButton = 0;
     public float m_MaxShootDistance = 200.0f;
     public LayerMask m_ShootLayerMask;
-    public GameObject m_HitPartcilesPrefab;
-    public CPoolElements m_HitParticlesPool;
 
     [Header("Weapon Animation")]
     public Animation m_Animation;
@@ -342,13 +340,6 @@ public class FPSController : MonoBehaviour
                         l_HitCollider.Hit();
                     }
                 }
-                else
-                {
-                    CreateShoothitparticles(
-                        l_RaycastHit.point,
-                        l_RaycastHit.normal
-                    );
-                }
 
 
 
@@ -363,13 +354,6 @@ public class FPSController : MonoBehaviour
             }
         }
 
-        void CreateShoothitparticles(Vector3 position, Vector3 normal)
-        {
-            GameObject l_GameObject = m_HitParticlesPool.GetNextElement();
-            l_GameObject.SetActive(true);
-            l_GameObject.transform.position = position;
-            l_GameObject.transform.rotation = Quaternion.LookRotation(normal);
-        }
     }
 
     public void TakeDamage(int damage)

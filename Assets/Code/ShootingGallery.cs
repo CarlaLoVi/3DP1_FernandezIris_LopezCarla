@@ -176,6 +176,9 @@ public class ShootingGallery : MonoBehaviour
         }
     }
 
-
+    public bool HasReachedGoal()
+    {
+        return m_Score >= m_GoalScore;
+    }
 
 }
