@@ -1,7 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEditor.Progress;
+using UnityEngine.UI;
+using TMPro;
 
 public class FPSController : MonoBehaviour
 {
@@ -58,6 +59,20 @@ public class FPSController : MonoBehaviour
     public AnimationClip m_ShootAnimation;
     public AnimationClip m_ReloadAnimation;
 
+    [Header("Damage Feedback")]
+    public Image m_DamageFlashImage;
+    public float m_DamageFlashDuration = 0.4f;
+    public float m_DamageFlashAlpha = 0.45f;
+    Coroutine m_DamageFlashCoroutine;
+
+    [Header("Player Life")]
+    public int m_MaxLife = 100;
+    private int m_Life;
+
+    public TMP_Text m_LifeText;
+
+
+
     private void Awake()
     {
         m_CharacterController = GetComponent<CharacterController>();
@@ -72,6 +87,8 @@ public class FPSController : MonoBehaviour
         m_Pitch = m_PitchController.eulerAngles.x;
         Cursor.lockState = CursorLockMode.Locked;
         m_HitParticlesPool = new CPoolElements(10, m_HitPartcilesPrefab);
+        m_Life = m_MaxLife;
+        UpdateLifeUI();
 
         if (m_Animation != null)  // per a que funcionin les animacions. 
         {
@@ -288,6 +305,67 @@ public class FPSController : MonoBehaviour
             l_GameObject.transform.rotation = Quaternion.LookRotation(normal);
         }
     }
+
+    public void TakeDamage(int damage)
+    {
+        m_Life = Mathf.Max(0, m_Life - damage);
+
+        // Actualizar el HUD.
+        UpdateLifeUI();
+
+        Debug.Log("Vida del jugador: " + m_Life);
+
+        // Mantener el efecto rojo que ya hemos creado.
+        if (m_DamageFlashImage == null)
+        {
+            Debug.LogWarning(
+                "Asigna DamageFlash en el Inspector."
+            );
+            return;
+        }
+
+        if (m_DamageFlashCoroutine != null)
+        {
+            StopCoroutine(m_DamageFlashCoroutine);
+        }
+
+        m_DamageFlashCoroutine =
+            StartCoroutine(DamageFlashCoroutine());
+    }
+
+    void UpdateLifeUI()
+    {
+        if (m_LifeText != null)
+        {
+            m_LifeText.text =
+                "Vida: " + m_Life + " / " + m_MaxLife;
+        }
+    }
+    System.Collections.IEnumerator DamageFlashCoroutine()
+    {
+        float l_Duration = Mathf.Max(0.01f, m_DamageFlashDuration);
+        float l_Elapsed = 0f;
+
+        while (l_Elapsed < l_Duration)
+        {
+            l_Elapsed += Time.deltaTime;
+
+            float l_Alpha = Mathf.Lerp(
+                m_DamageFlashAlpha,
+                0f,
+                Mathf.Clamp01(l_Elapsed / l_Duration)
+            );
+
+            m_DamageFlashImage.color = new Color(
+                1f, 0f, 0f, l_Alpha
+            );
+
+            yield return null;
+        }
+        m_DamageFlashImage.color = new Color(1f, 0f, 0f, 0f);
+
+        m_DamageFlashCoroutine = null;
+    }
     void SetIdWeaponAnimation()
     {
         m_Animation.CrossFade(m_IdleAnimation.name, 0.1f);
@@ -312,10 +390,10 @@ public class FPSController : MonoBehaviour
             {
                 l_Item.Pick();
             }
-            else if (other.CompareTag("DeathZone"))
-            {
-                Kill();
-            }
+        }
+        if (other.CompareTag("DeadZone"))
+        {
+            Kill();
         }
         if (other.CompareTag("Key"))
         {

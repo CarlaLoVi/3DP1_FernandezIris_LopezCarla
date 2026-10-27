@@ -452,12 +452,51 @@ public class DroneEnemy : MonoBehaviour
 
     void ApplyDamageToPlayer()
     {
+        FPSController l_PlayerController = null;
+
+        // Primero, buscar en el objeto del jugador.
         if (m_PlayerTransform != null)
         {
-            // Intenta infligir daño por mensaje para no depender de una clase específica de Player
-            m_PlayerTransform.SendMessage("TakeDamage", m_Damage, SendMessageOptions.DontRequireReceiver);
-            m_PlayerTransform.SendMessage("ReceiveDamage", m_Damage, SendMessageOptions.DontRequireReceiver);
+            l_PlayerController =
+                m_PlayerTransform.GetComponent<FPSController>();
+
+            // Si no está ahí, buscar en los padres.
+            if (l_PlayerController == null)
+            {
+                l_PlayerController =
+                    m_PlayerTransform.GetComponentInParent<FPSController>();
+            }
+
+            // Si tampoco está, buscar en los hijos.
+            if (l_PlayerController == null)
+            {
+                l_PlayerController =
+                    m_PlayerTransform.GetComponentInChildren<FPSController>();
+            }
         }
+
+        // Último recurso: buscar el controlador en la escena.
+        if (l_PlayerController == null)
+        {
+            l_PlayerController =
+                FindAnyObjectByType<FPSController>();
+        }
+
+        if (l_PlayerController == null)
+        {
+            Debug.LogError(
+                "No se encuentra ningún FPSController activo en la escena."
+            );
+            return;
+        }
+
+        // Guardar la referencia correcta del jugador.
+        m_PlayerTransform = l_PlayerController.transform;
+
+        // Aplicar el daño y activar el efecto rojo.
+        l_PlayerController.TakeDamage(m_Damage);
+
+        Debug.Log("El dron ha hecho " + m_Damage + " de daño al jugador.");
     }
 
     void PlayShootSound()

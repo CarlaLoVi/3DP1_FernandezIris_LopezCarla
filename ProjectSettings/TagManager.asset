@@ -6,10 +6,10 @@ TagManager:
   tags:
   - HitCollider
   - BulletHole
-  - DeathZone
   - Enemy
   - Door
   - Key
+  - DeadZone
   layers:
   - Default
   - TransparentFX
