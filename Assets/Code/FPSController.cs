@@ -32,7 +32,6 @@ public class FPSController : MonoBehaviour
     Quaternion m_StartRotation;
 
 
-
     [Header("Input")]
     public KeyCode m_LeftKeyCode = KeyCode.A;
     public KeyCode m_RightKeyCode = KeyCode.D;
@@ -80,11 +79,6 @@ public class FPSController : MonoBehaviour
         m_MaxLife = Mathf.Max(1, m_MaxLife);
         m_Life = m_MaxLife;
 
-        Debug.Log(
-            "VIDA INICIALIZADA: " + m_Life +
-            " | Jugador: " + name +
-            " | ID: " 
-        );
     }
 
 
@@ -95,7 +89,7 @@ public class FPSController : MonoBehaviour
         m_Yaw = transform.rotation.eulerAngles.y;
         m_Pitch = m_PitchController.eulerAngles.x;
         Cursor.lockState = CursorLockMode.Locked;
-        m_HitParticlesPool = new CPoolElements(10, m_HitPartcilesPrefab);
+        //m_HitParticlesPool = new CPoolElements(10, m_HitPartcilesPrefab);
 
         if (m_MaxLife <= 0)
         {
@@ -105,8 +99,6 @@ public class FPSController : MonoBehaviour
         m_Life = m_MaxLife;
 
         UpdateLifeUI();
-
-        Debug.Log("VIDA INICIALIZADA: " + m_Life);
 
         if (m_Animation != null)  // per a que funcionin les animacions. 
         {
@@ -171,10 +163,6 @@ public class FPSController : MonoBehaviour
                     {
                         l_RaycastHit.collider.gameObject.SetActive(false);
                     }
-                    else
-                    {
-                        Debug.Log("Necessites la clau per obrir la porta.");
-                    }
                 }
             }
         }
@@ -211,7 +199,6 @@ public class FPSController : MonoBehaviour
         l_Forward.Normalize();
 
 
-
         if (Input.GetKey(m_RightKeyCode))
         {
             l_Direction = l_Right;
@@ -238,7 +225,6 @@ public class FPSController : MonoBehaviour
         }
         if (Input.GetKeyDown(m_JumpKeyCode) && (m_VerticalSpeed < 0.2f && m_VerticalSpeed > -0.2f)/*m_CharacterController.isGrounded*/)
         {
-            Debug.Log("jump");
             m_VerticalSpeed = m_JumpSpeed;
         }
 
@@ -247,14 +233,14 @@ public class FPSController : MonoBehaviour
         l_Direction.Normalize();
         l_Direction = l_Direction * l_Speed * Time.deltaTime;
         l_Direction.y = m_VerticalSpeed * Time.deltaTime;
-        CollisionFlags l_CollisionFlags = m_CharacterController.Move(l_Direction);  //CollisionFlags variable tipo mascara binaria si colisiona suelo arriba lateral... 
+        CollisionFlags l_CollisionFlags = m_CharacterController.Move(l_Direction);
 
-        if ((l_CollisionFlags & CollisionFlags.CollidedBelow) != 0)  // SI colisiono con el suelo y la velocidad es distinta a 0 vertical speed es 0
+        if ((l_CollisionFlags & CollisionFlags.CollidedBelow) != 0) 
         {
             m_VerticalSpeed = 0.0f;
 
         }
-        else if ((l_CollisionFlags & CollisionFlags.CollidedAbove) != 0 && m_VerticalSpeed > 0.0f)  // Si colisiono por arriba i la velocidad es ascendiente, la velocidad es 0.
+        else if ((l_CollisionFlags & CollisionFlags.CollidedAbove) != 0 && m_VerticalSpeed > 0.0f)
         {
             m_VerticalSpeed = 0.0f;
         }
@@ -270,8 +256,6 @@ public class FPSController : MonoBehaviour
         {
             Reload();
         }
-
-        UpdateLifeBarEnemies();
 
         bool CanReload()
         {
@@ -297,21 +281,45 @@ public class FPSController : MonoBehaviour
             return Input.GetMouseButtonDown(m_ShootButton);
         }
 
-        // En el raycast definimos distancia de la bala. Podemos jugar con la fisica con las balas. 
         void Shoot()
         {
             SetShootWeaponAnimation();
             Ray l_Ray = m_Camera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
             if (Physics.Raycast(l_Ray, out RaycastHit l_RaycastHit, m_MaxShootDistance, m_ShootLayerMask.value))
             {
-                if (l_RaycastHit.collider.CompareTag("HitCollider"))
+                ShootingGalleryTarget l_Target = l_RaycastHit.collider.GetComponentInParent<ShootingGalleryTarget>();
+
+                if (l_Target != null)
+                {
+                    l_Target.Hit();
+                }
+                else if (l_RaycastHit.collider.CompareTag("HitCollider"))
+                {
+                    HitCollider l_HitCollider = l_RaycastHit.collider.GetComponentInParent<HitCollider>();
+
+                    if (l_HitCollider != null)
+                    {
+                        l_HitCollider.Hit();
+                    }
+                }
+                else
+                {
+                    CreateShoothitparticles(
+                        l_RaycastHit.point,
+                        l_RaycastHit.normal
+                    );
+                }
+
+
+
+                /*if (l_RaycastHit.collider.CompareTag("HitCollider"))
                 {
                     l_RaycastHit.collider.GetComponent<HitCollider>().Hit();
                 }
                 else
                 {
                     CreateShoothitparticles(l_RaycastHit.point, l_RaycastHit.normal);
-                }                
+                }  */
             }
         }
 
@@ -326,28 +334,18 @@ public class FPSController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        Debug.Log(
-            "DAÑO RECIBIDO: " + damage +
-            " | VIDA ANTES: " + m_Life
-        );
 
-        // Si el jugador ya no tiene vida, no aplicar más daño.
         if (m_Life <= 0)
         {
-            Debug.LogWarning("El jugador ya tiene 0 de vida.");
             return;
         }
 
-        // Restar el daño sin permitir vida negativa.
         damage = Mathf.Max(0, damage);
         m_Life = Mathf.Max(0, m_Life - damage);
 
-        // Actualizar el texto del HUD.
         UpdateLifeUI();
 
-        Debug.Log("VIDA DESPUÉS: " + m_Life);
 
-        // Mostrar el efecto rojo si la imagen está asignada.
         if (m_DamageFlashImage != null)
         {
             if (m_DamageFlashCoroutine != null)
@@ -355,27 +353,18 @@ public class FPSController : MonoBehaviour
                 StopCoroutine(m_DamageFlashCoroutine);
             }
 
-            m_DamageFlashCoroutine =
-                StartCoroutine(DamageFlashCoroutine());
-        }
-        else
-        {
-            Debug.LogWarning(
-                "Falta asignar Damage Flash Image en el Inspector."
-            );
+            m_DamageFlashCoroutine = StartCoroutine(DamageFlashCoroutine());
         }
     }
 
-    void UpdateLifeUI()
+    public void UpdateLifeUI()
     {
         if (m_LifeText == null)
         {
-            Debug.LogError("Life Text no está asignado.", this);
             return;
         }
 
-        m_LifeText.text =
-            "Life Points\n" + m_Life + "/" + m_MaxLife;
+        m_LifeText.text = "Life " + m_Life + "/" + m_MaxLife;
     }
 
     System.Collections.IEnumerator DamageFlashCoroutine()
@@ -403,16 +392,16 @@ public class FPSController : MonoBehaviour
 
         m_DamageFlashCoroutine = null;
     }
-    void SetIdWeaponAnimation()
+    public void SetIdWeaponAnimation()
     {
         m_Animation.CrossFade(m_IdleAnimation.name, 0.1f);
     }
-    void SetShootWeaponAnimation()
+    public void SetShootWeaponAnimation()
     {
         m_Animation.CrossFade(m_ShootAnimation.name, 0.1f);
         m_Animation.CrossFadeQueued(m_IdleAnimation.name, 0.3f);
     }
-    void SetreloadWeaponAnimation()
+    public void SetreloadWeaponAnimation()
     {
         m_Animation.CrossFade(m_ReloadAnimation.name, 0.1f);
         m_Animation.CrossFadeQueued(m_IdleAnimation.name, 0.3f);
@@ -438,10 +427,8 @@ public class FPSController : MonoBehaviour
             other.gameObject.SetActive(false); 
         }
     }
-    void Kill()
+    public void Kill()
     {
-        //yield return new WaitForSeconds(1.5f);
-        //GameController.GetGameController().Restart();
         StartCoroutine(GameController.GetGameController().GetFade().FadeIn(() => {
             GameController.GetGameController().GetFade().gameObject.SetActive(false);
             GameController.GetGameController().Restart();
@@ -456,105 +443,4 @@ public class FPSController : MonoBehaviour
         m_CharacterController.enabled = true;
     }
 
-    void UpdateLifeBarEnemies()
-    {
-        GameController l_GameController =
-            GameController.GetGameController();
-
-        if (l_GameController == null ||
-            l_GameController.GetIngameUI() == null ||
-            m_Camera == null)
-        {
-            return;
-        }
-
-        LifeBarElementUI l_LifeBarElementUI =
-            l_GameController.GetIngameUI().m_LifeBarElementUI;
-
-        if (l_LifeBarElementUI == null)
-        {
-            return;
-        }
-
-        RectTransform l_ParentRect =
-            l_LifeBarElementUI.transform.parent
-                as RectTransform;
-
-        Canvas l_Canvas =
-            l_LifeBarElementUI.GetComponentInParent<Canvas>();
-
-        if (l_ParentRect == null || l_Canvas == null)
-        {
-            return;
-        }
-
-        // En Screen Space Overlay no se necesita una cámara de UI.
-        Camera l_UICamera =
-            l_Canvas.renderMode == RenderMode.ScreenSpaceOverlay
-                ? null
-                : (l_Canvas.worldCamera != null
-                    ? l_Canvas.worldCamera
-                    : m_Camera);
-
-        // Ocultar la barra hasta encontrar un enemigo válido.
-        l_LifeBarElementUI.Hide();
-
-        List<DroneEnemy> l_Enemies =
-            l_GameController.GetEnemies();
-
-        foreach (DroneEnemy l_Enemy in l_Enemies)
-        {
-            if (l_Enemy == null ||
-                !l_Enemy.gameObject.activeInHierarchy ||
-                l_Enemy.GetLife() <= 0 ||
-                l_Enemy.m_LifeBarPosition == null ||
-                l_Enemy.m_MaxLife <= 0)
-            {
-                continue;
-            }
-
-            // Posición del ancla del enemigo en pantalla.
-            Vector3 l_ScreenPosition =
-                m_Camera.WorldToScreenPoint(
-                    l_Enemy.m_LifeBarPosition.position
-                );
-
-            // Ignorar enemigos detrás de la cámara o fuera de pantalla.
-            if (l_ScreenPosition.z <= 0f ||
-                l_ScreenPosition.x < 0f ||
-                l_ScreenPosition.x > Screen.width ||
-                l_ScreenPosition.y < 0f ||
-                l_ScreenPosition.y > Screen.height)
-            {
-                continue;
-            }
-
-            // Convertir coordenadas de pantalla a coordenadas del Canvas.
-            Vector2 l_LocalPosition;
-
-            bool l_PositionIsValid =
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    l_ParentRect,
-                    l_ScreenPosition,
-                    l_UICamera,
-                    out l_LocalPosition
-                );
-
-            if (!l_PositionIsValid)
-            {
-                continue;
-            }
-
-            float l_NormalizedLife =
-                l_Enemy.GetLife() / (float)l_Enemy.m_MaxLife;
-
-            l_LifeBarElementUI.Show(
-                l_LocalPosition,
-                l_NormalizedLife
-            );
-
-            // Un único elemento de barra reutilizable.
-            break;
-        }
-    }
 }

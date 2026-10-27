@@ -613,6 +613,37 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &5333123038709545490
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8255386136315635348}
+  m_Layer: 7
+  m_Name: LifeBarAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &8255386136315635348
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5333123038709545490}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.285, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7939657363566960945}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5919957019677698245
 GameObject:
   m_ObjectHideFlags: 0
@@ -857,7 +888,7 @@ Transform:
   m_GameObject: {fileID: 7497024675621902159}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 131.44, y: 1.84, z: 182.63719}
+  m_LocalPosition: {x: 130.81, y: 1.84, z: 185.24}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -866,6 +897,7 @@ Transform:
   - {fileID: 4824154703376954118}
   - {fileID: 1326575314252223921}
   - {fileID: 6317402908380667876}
+  - {fileID: 8255386136315635348}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7479468764242147567
@@ -880,13 +912,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc85831fc5007a74ca8f10555af97486, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DroneEnemy
-  m_Waypoints: []
-  m_ChaseDistance: 5
+  m_Waypoints:
+  - {fileID: 0}
+  - {fileID: 0}
+  m_MinDistanceToAttack: 2
+  m_MaxEarsDistance: 15
+  m_MaxChaseDistance: 10
+  m_ShootMaxDistance: 5
   m_MaxLife: 50
-  m_LifeBarPosition: {fileID: 0}
+  m_Damage: 10
+  m_AttackTime: 1.5
+  m_AlertAngle: 360
+  m_SightAngle: 60
+  m_SightLayerMask:
+    serializedVersion: 2
+    m_Bits: 8
+  m_EyesHeight: 1.8
+  m_SightDistance: 5
+  m_LifeBarPosition: {fileID: 8255386136315635348}
+  m_LifeBarElementUI: {fileID: 0}
+  m_ShowLifeBarDistance: 15
+  m_MeshRenderers: []
+  m_DeadTime: 1.5
   m_HelixHitColliderAmount: 10
   m_HeadHitColliderAmount: 50
   m_BodyHitColliderAmount: 20
+  m_AudioSource: {fileID: 0}
+  m_ShootSound: {fileID: 0}
 --- !u!195 &383302589312260766
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -936,7 +988,7 @@ Transform:
   m_GameObject: {fileID: 8277499773078837942}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: -0.00047037602, z: 0.07770232}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

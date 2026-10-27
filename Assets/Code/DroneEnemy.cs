@@ -381,33 +381,26 @@ public class DroneEnemy : MonoBehaviour
         if (m_PlayerTransform == null && !FindPlayer()) return false;
 
         Vector3 l_EyePosition = transform.position + Vector3.up * m_EyesHeight;
-        Vector3 l_PlayerTargetPos = m_PlayerTransform.position + Vector3.up * 1.0f; // Apunta al centro del cuerpo
+        Vector3 l_PlayerTargetPos = m_PlayerTransform.position + Vector3.up * 1.0f; 
         Vector3 l_Direction = (l_PlayerTargetPos - l_EyePosition).normalized;
         float l_Distance = Vector3.Distance(l_EyePosition, l_PlayerTargetPos);
 
         if (l_Distance > m_SightDistance) return false;
 
-        // Comprobación de cono de visión
         if (Vector3.Angle(transform.forward, l_Direction) <= m_SightAngle * 0.5f)
         {
-            // Dibujar línea de depuración en la ventana Scene (Verde = Ve al player)
-            Debug.DrawLine(l_EyePosition, l_PlayerTargetPos, Color.green);
-
             RaycastHit[] l_Hits = Physics.RaycastAll(l_EyePosition, l_Direction, m_SightDistance);
             System.Array.Sort(l_Hits, (x, y) => x.distance.CompareTo(y.distance));
 
             foreach (RaycastHit l_Hit in l_Hits)
             {
-                // Ignorar piezas del propio dron
                 if (l_Hit.transform == transform || l_Hit.transform.IsChildOf(transform)) continue;
 
-                // Detectar si impacta en el Jugador
                 if (l_Hit.collider.CompareTag("Player") || l_Hit.transform.IsChildOf(m_PlayerTransform))
                 {
                     return true;
                 }
 
-                // Si impacta con pared o terreno antes que con el jugador -> No lo ve
                 break;
             }
         }
@@ -455,14 +448,12 @@ public class DroneEnemy : MonoBehaviour
         // Primero, buscar en el objeto del jugador.
         if (m_PlayerTransform != null)
         {
-            l_PlayerController =
-                m_PlayerTransform.GetComponent<FPSController>();
+            l_PlayerController = m_PlayerTransform.GetComponent<FPSController>();
 
             // Si no está ahí, buscar en los padres.
             if (l_PlayerController == null)
             {
-                l_PlayerController =
-                    m_PlayerTransform.GetComponentInParent<FPSController>();
+                l_PlayerController = m_PlayerTransform.GetComponentInParent<FPSController>();
             }
 
             // Si tampoco está, buscar en los hijos.
@@ -482,9 +473,6 @@ public class DroneEnemy : MonoBehaviour
 
         if (l_PlayerController == null)
         {
-            Debug.LogError(
-                "No se encuentra ningún FPSController activo en la escena."
-            );
             return;
         }
 
@@ -494,7 +482,6 @@ public class DroneEnemy : MonoBehaviour
         // Aplicar el daño y activar el efecto rojo.
         l_PlayerController.TakeDamage(m_Damage);
 
-        Debug.Log("El dron ha hecho " + m_Damage + " de daño al jugador.");
     }
 
     void PlayShootSound()
@@ -555,7 +542,6 @@ public class DroneEnemy : MonoBehaviour
                 l_LifePoints = m_HelixHitColliderAmount;
                 break;
             default:
-                Debug.LogError("HitColliderType '" + HitColliderType);
                 break;
         }
 
@@ -569,7 +555,6 @@ public class DroneEnemy : MonoBehaviour
             SetHitState();
         }
 
-        Debug.Log("hit current life " +  m_Life);
     }
 
     public int GetLife()
